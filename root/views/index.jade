@@ -1,0 +1,38 @@
+extends ./layout.jade
+block content
+	header
+		div(class='logo')
+		div(class='btn_container')
+			div(class='input')
+				input(type='text' id='newsLimit' placeholder="Enter Name")
+			div(class='filter_wrap')
+				div(class='refine_layer')
+					div(class='category selected' data-target='department_container') Department
+					div(class='seperator_v')
+					div(class='category' data-target='team_container') Designation
+					div(class='seperator_h')
+					- var team_array = ['Software-engineer','Senior-Software-engineer','Software-designer','Senior-Product-Manager','Product-Manager']
+					- var department = ['Frontend','Backend','product-management','Design']
+						.team_container.hide.refine_params
+							ul
+								- for (var i = 0; i< team_array.length; i++)
+									li
+										input(type='radio' name='refine_team' class='checkbox')
+										span=team_array[i]
+						.department_container.show.refine_params
+							ul
+								- for (var i = 0; i< department.length; i++)
+									li
+										input(type='radio' name='refine_dept' class='checkbox')
+										span=department[i]
+										
+				<?xml version="1.0" ?><!DOCTYPE svg  PUBLIC '-//W3C//DTD SVG 1.1//EN'  'http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd'><svg enable-background="new 0 0 36 30" height="30px" id="Layer_1" version="1.1" viewBox="0 0 36 30" width="36px" xml:space="preserve" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink"><polygon fill="#3fb0ac" points="14,30 22,25 22,17 35.999,0 17.988,0 0,0 14,17 "/></svg>
+		h1 #{title}
+	div(class='container')
+		div(class='cluster supply')
+		div(class='cluster rent')
+		div(class='cluster buy')
+		div(class='cluster business')
+		div(class='cluster tech_only')
+		div(class='cluster search')
+	footer
