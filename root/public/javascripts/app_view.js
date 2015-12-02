@@ -25,14 +25,8 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
     };
 
     Spot.prototype.initialize = function() {
-      Spot.prototype.get_data();
-      this.input=$('#newsLimit');
-      var self = this;
-      this.input.autocomplete({
-        appendTo: ".input",
-        source: self.data,
-        select: self.select_name
-      });
+      debugger
+      data=Spot.prototype.get_data();
     }
 
     Spot.prototype.get_data= function(){
@@ -43,13 +37,19 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
           self.data=data;
           self.render(data);
           self.instantiate_draggable(data);
+          self.input=$('#newsLimit');
+          self.input.autocomplete({
+              appendTo: ".input",
+              source: data,
+              select: self.select_name
+          });
         });
       }
 
     Spot.prototype.instantiate_draggable = function(data) {
       var self = this;
       self.dragged_name = {}
-      $('.seat,body').draggable({
+      $('.seat').draggable({
         start: function( event, ui ) {
           $(this).addClass('dragging')
           self.dragged_name.element = this

@@ -226,6 +226,9 @@ footer{
     width: 130px;
     white-space: nowrap;
 }
+.ui-menu-item{
+    width: 100%;
+}
 .hover_layer{
 	display: none;
 	background: white;
