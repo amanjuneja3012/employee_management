@@ -25,32 +25,7 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
     };
 
     Spot.prototype.initialize = function() {
-      this.data = [
-            {'value':'Aman','designation':'software-engineer','dept':'frontend','team':'supply'},
-            {'value':'Raman','designation':'software-designer','dept':'design','team':'supply'},
-            {'value':'Rita','designation':'product-manager','dept':'product-management','team':'supply'},
-            {'value':'Sameera','designation':'senior-software-engineer','dept':'backend','team':'supply'},
-            {'value':'Daman','designation':'software-engineer','dept':'backend','team':'buy'},
-            {'value':'Chaman','designation':'senior-software-engineer','dept':'frontend','team':'buy'},
-            {'value':'Chhavi','designation':'software-designer','dept':'design','team':'buy'},
-            {'value':'Dipti','designation':'product-manager','dept':'product-management','team':'buy'},
-            {'value':'Rahul','designation':'software-engineer','dept':'backend','team':'business'},
-            {'value':'Mohit','designation':'senior-software-engineer','dept':'frontend','team':'business'},
-            {'value':'Ankit','designation':'senior-product-manager','dept':'product-management','team':'business'},
-            {'value':'Dhruv','designation':'software-designer','dept':'design','team':'business'},
-            {'value':'Naman','designation':'senior-software-engineer','dept':'frontend','team':'rent'},
-            {'value':'Madhvi','designation':'software-engineer','dept':'backend','team':'rent'},
-            {'value':'Saurabh','designation':'product-manager','dept':'product-management','team':'rent'},
-            {'value':'Gaurav','designation':'software-designer','dept':'design','team':'rent'},
-            {'value':'Saurav','designation':'senior-software-engineer','dept':'backend','team':'search'},
-            {'value':'Chitrak','designation':'senior-product-manager','dept':'product-management','team':'search'},
-            {'value':'Chirag','designation':'software-engineer','dept':'frontend','team':'search'},
-            {'value':'Neha','designation':'software-designer','dept':'design','team':'search'},
-            {'value':'Sandy','designation':'software-designer','dept':'design','team':'tech_only'},
-            {'value':'Simran','designation':'software-engineer','dept':'frontend','team':'tech_only'},
-            {'value':'Sriram','designation':'senior-software-engineer','dept':'backend','team':'tech_only'},
-            {'value':'manu','designation':'senior-software-engineer','dept':'product-management','team':'tech_only'}
-          ]
+      Spot.prototype.get_data();
       this.input=$('#newsLimit');
       var self = this;
       this.input.autocomplete({
@@ -58,11 +33,29 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
         source: self.data,
         select: self.select_name
       });
-      this.render(this.data);
-      $('.seat').draggable({
+    }
+
+    Spot.prototype.get_data= function(){
+      self=this;
+      $.ajax({
+        url: "/api/employees",
+        }).done(function(data) {
+          self.data=data;
+          self.render(data);
+          self.instantiate_draggable(data);
+        });
+      }
+
+    Spot.prototype.instantiate_draggable = function(data) {
+      var self = this;
+      self.dragged_name = {}
+      $('.seat,body').draggable({
         start: function( event, ui ) {
           $(this).addClass('dragging')
-          debugger
+          self.dragged_name.element = this
+          self.dragged_name.id = this.dataset.id
+          self.dragged_name.top = this.style.top
+          self.dragged_name.left = this.style.left
         },
         stop: function(event, ui){
           $(this).removeClass('dragging')
@@ -71,23 +64,44 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
       $( ".seat" ).droppable({
         drop: function( event, ui ) {
           $( this ).addClass( "dropped" ).removeClass('overing')
+          $('.notification').hide()
+          event.stopPropagation()
+          var a = Spot.prototype.get_index(self.dragged_name.id,data)
+          var b = Spot.prototype.get_index(this.dataset.id,data)
+          Spot.prototype.swap_members({
+            'array':data,
+            'a':a,
+            'b':b
+          })
+          Spot.prototype.render(data);
+          Spot.prototype.instantiate_draggable(data);
         },
         over:function (events,ui){
           $(this).addClass('overing')
+          $('.notification').show()
         },
         out:function (events,ui){
           $(this).removeClass('overing')
         }
       });
-    }
+      $('body').droppable({
+        drop:function(event, ui){
+          if(self.dragged_name.hasOwnProperty('element')){
+            self.dragged_name.element.style.top = self.dragged_name.top
+            self.dragged_name.element.style.left = self.dragged_name.left
+          }
+        }
+      })
+    };
 
     Spot.prototype.render = function(data) {
+      $('.cluster').html('')
       var counter={seat_count:0,right_seats:false}
       data.forEach(function(e,index){
         if(index%4==0){
           counter.seat_count=1;
         }
-        $('.'+e.team).append('<div draggable="true" class="seat'+counter.seat_count+' seat"'+' data-name='+e.value+' data-designation='+e.designation+' data-dept='+e.dept+' data-team='+e.team+'></div>')
+        $('.'+e.team).append('<div draggable="true" class="seat'+counter.seat_count+' seat"'+' data-name='+e.value+' data-designation='+e.designation+' data-dept='+e.dept+' data-team='+e.team+' data-id='+ e.id+'></div>')
         if(counter.seat_count==2)
           $('.'+e.team).append('<div class="table"><div class="table_text">'+e.team+' Team</div></div>')
         counter.seat_count++;
@@ -98,8 +112,23 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
       Spot.prototype.handle_hover({currentTarget:$('.seat[data-name='+ui.item.value+']')[0]})
     };
 
+    Spot.prototype.get_index = function(id,array){
+      var self=this;
+      $.map(array, function(obj, index) {
+        if(obj.id == id) {
+          self.target_index=index;
+        }
+      })
+      return self.target_index;
+    }
+
+    Spot.prototype.swap_members = function(obj) {
+      var tmp=obj.array[obj.a];
+      obj.array[obj.a]=obj.array[obj.b];
+      obj.array[obj.b]=tmp;
+    };
+
     Spot.prototype.refine_results = function(event) {
-      debugger
       $('.hovered').removeClass('hovered')
       var text=$(event.currentTarget).children('span').text()
       var parent_class_array=event.currentTarget.parentElement.parentElement.classList
@@ -157,7 +186,6 @@ define(['typeahead','backbone.min','jquery-ui.min'], function(typeahead,Backbone
     }
 
     Spot.prototype.detach_event = function(e_name) {
-        debugger
         delete this.events[e_name]
         this.delegateEvents()
     };

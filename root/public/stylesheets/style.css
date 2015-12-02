@@ -386,6 +386,16 @@ footer{
 .dropped{
 
 }
+.notification{
+    position: absolute;
+    left: 0;
+    right: 0;
+    margin: auto;
+    text-align: center;
+    padding: 20px;
+    font-size: 20px;
+    display: none;
+}
 ::-webkit-input-placeholder { color:#3fb0ac; }
 ::-moz-placeholder { color:#3fb0ac; } /* firefox 19+ */
 :-ms-input-placeholder { color:#3fb0ac; } /* ie */
